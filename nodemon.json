@@ -1,11 +1,10 @@
 {
   "watch": [
-    "src",
-    ".env"
+    "src"
   ],
   "ext": "js,ts,json",
   "ignore": [
     "src/**/*.spec.ts"
   ],
-  "exec": "ts-node  --transpile-only ./src/core/bot.ts"
+  "exec": "node --experimental-specifier-resolution=node --loader ts-node/esm ./src/core/bot.ts"
 }

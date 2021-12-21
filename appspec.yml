@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: .
+    destination: /home/ec2-user/ntm-gaming-team-bot/
+hooks:
+  AfterInstall:
+    - location: yarn build
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: yarn release
+      timeout: 300
+      runas: root
