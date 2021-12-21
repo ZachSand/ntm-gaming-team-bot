@@ -14,7 +14,7 @@
     "dev": "nodemon",
     "release": "node --loader ts-node/esm ./src/core/bot.ts",
     "inspect": "nodemon --inspect src/core/bot.ts",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "npm run lint:js ",
     "lint:eslint": "eslint --ignore-path .gitignore --ext .ts",
     "lint:js": "npm run lint:eslint src/",
