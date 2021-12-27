@@ -4,11 +4,7 @@ files:
   - source: .
     destination: /home/ec2-user/ntm-gaming-team-bot/
 hooks:
-  AfterInstall:
-    - location: yarn install
-      timeout: 300
-      runas: root
   ApplicationStart:
-    - location: yarn build && yarn production-stop && yarn production-start
+    - location: yarn install && yarn build && yarn production-stop && yarn production-start
       timeout: 300
       runas: root
