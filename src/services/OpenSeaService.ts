@@ -3,7 +3,7 @@ import { OpenSeaAsset } from '../types/openSeaAsset.js';
 import { AssetElement, OpenSeaAssetCollectionPage } from '../types/openSeaAssetCollectionPageResponse.js';
 import { getOpenSeaAssetByNameAndCollection, writeOpenSeaAsset } from '../functions/databases.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
-import logger from '../configs/logger';
+import logger from '../configs/logger.js';
 
 const GALA_CONTRACT_ADDRESS = '0xc36cf0cfcb5d905b8b513860db0cfe63f6cf9f5c';
 const OS_ASSET_URI = 'https://api.opensea.io/api/v1/assets';

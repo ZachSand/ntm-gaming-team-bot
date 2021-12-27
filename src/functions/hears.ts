@@ -5,7 +5,7 @@ import getTsWeeklyLeaderboard from '../services/TownStarService.js';
 import buildTownStarWeeklyLeaderboardEmbed from '../services/TownStarMessageService.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
 import getOpenSeaAsset from '../services/OpenSeaService.js';
-import logger from '../configs/logger';
+import logger from '../configs/logger.js';
 
 function handleBotHelp(ctx: Message<boolean>) {
   ctx.channel

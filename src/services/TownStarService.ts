@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
-import logger from '../configs/logger';
+import logger from '../configs/logger.js';
 
 async function authenticateSession(): Promise<void> {
   const sessionId = process.env.TOWNSTAR_SESSION_ID;
