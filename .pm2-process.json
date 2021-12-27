@@ -1,9 +1,9 @@
 {
   "name": "ntm-gaming-team-bot",
-  "script": "build/core/bot.js",
+  "script": "./build/src/bot.js",
   "watch": true,
   "max_memory_restart": "512M",
-  "instances": "2",
+  "instances": "1",
   "exec_mode": "cluster",
   "error_file": "./logs/errors_pm2.log",
   "out_file": "./logs/debug_pm2.log",
