@@ -4,10 +4,6 @@ files:
   - source: .
     destination: /home/ec2-user/ntm-gaming-team-bot/
 hooks:
-  BeforeInstall:
-    - location: setup_env.sh
-      timeout: 3000
-      runas: ec2-user
   ApplicationStart:
     - location: yarn install && yarn build && yarn production-stop && yarn production-start
       timeout: 10000
