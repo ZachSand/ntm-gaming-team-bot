@@ -6,7 +6,8 @@
     "target": "esnext",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": [
     "./package.json",

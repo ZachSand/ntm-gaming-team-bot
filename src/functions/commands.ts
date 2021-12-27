@@ -1,8 +1,7 @@
 import bot from './discord.js';
-import CONFIG from '../configs/config.js';
 
 const launch = async (): Promise<void> => {
-  await bot.login(CONFIG.discord.token);
+  await bot.login(process.env.DISCORD_BOT_KEY);
 };
 
 export default launch;
