@@ -3,6 +3,7 @@ import { OpenSeaAsset } from '../types/openSeaAsset.js';
 import { AssetElement, OpenSeaAssetCollectionPage } from '../types/openSeaAssetCollectionPageResponse.js';
 import { getOpenSeaAssetByNameAndCollection, writeOpenSeaAsset } from '../functions/databases.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
+import logger from '../configs/logger';
 
 const GALA_CONTRACT_ADDRESS = '0xc36cf0cfcb5d905b8b513860db0cfe63f6cf9f5c';
 const OS_ASSET_URI = 'https://api.opensea.io/api/v1/assets';
@@ -34,7 +35,7 @@ async function getOpenSeaAssetPage(collection: string, offset: number): Promise<
       return undefined;
     })
     .catch((error: Error | AxiosError) => {
-      console.log(error);
+      logger.error(error);
       return undefined;
     });
 }
@@ -44,7 +45,7 @@ async function getOpenSeaAssetData(osAsset: OpenSeaAsset): Promise<OpenSeaAssetR
     .get<OpenSeaAssetResponse>(`https://api.opensea.io/api/v1/asset/${osAsset.contractAddress}/${osAsset.tokenId}`)
     .then((response: AxiosResponse<OpenSeaAssetResponse>) => response.data)
     .catch((error: Error | AxiosError) => {
-      console.log(error);
+      logger.error(error);
       return undefined;
     });
 }

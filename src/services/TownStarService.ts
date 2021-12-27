@@ -1,5 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
+import logger from '../configs/logger';
 
 async function authenticateSession(): Promise<void> {
   const sessionId = process.env.TOWNSTAR_SESSION_ID;
@@ -46,7 +47,7 @@ async function getTsWeeklyLeaderboard(): Promise<TownStarLeaderboardUser[] | und
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         authenticateSession();
       }
-      console.log(error);
+      logger.error(error);
       return undefined;
     });
 }

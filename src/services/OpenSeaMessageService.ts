@@ -16,8 +16,6 @@ function buildOpenSeaEmbedMessage(osAssetResponse: OpenSeaAssetResponse): Messag
     return new MessageEmbed().setDescription(`No listings or offers found for ${osAssetResponse.name}`);
   }
 
-  console.log(assetData);
-
   const currentAssetData = assetData.reduce((prev: Order, current: Order) =>
     (parseFloat(prev.current_price) / 10 ** prev.payment_token_contract.decimals) *
       parseFloat(prev.payment_token_contract.eth_price) <

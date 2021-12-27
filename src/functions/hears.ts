@@ -5,6 +5,7 @@ import getTsWeeklyLeaderboard from '../services/TownStarService.js';
 import buildTownStarWeeklyLeaderboardEmbed from '../services/TownStarMessageService.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
 import getOpenSeaAsset from '../services/OpenSeaService.js';
+import logger from '../configs/logger';
 
 function handleBotHelp(ctx: Message<boolean>) {
   ctx.channel
@@ -17,7 +18,7 @@ function handleBotHelp(ctx: Message<boolean>) {
         'Name must match the exact name in OpenSea. Example, `!os-mirandus Wharf`\n\n',
     )
     .catch((error: any) => {
-      console.error(error);
+      logger.error(error);
     });
 }
 
@@ -69,7 +70,7 @@ async function handleOpenSeaMessage(ctx: Message<boolean>) {
   const collection = parseOpenSeaCollection(ctx.content);
   if (!collection) {
     ctx.channel.send(`${ctx.content} is not a supported OpenSea Collection for this bot.`).catch((error: any) => {
-      console.error(error);
+      logger.error(error);
     });
     return;
   }
@@ -77,7 +78,7 @@ async function handleOpenSeaMessage(ctx: Message<boolean>) {
   const assetName = parseOpenSeaAssetName(ctx.content, collection);
   if (!assetName) {
     ctx.channel.send(`${ctx.content} is not a supported OpenSea asset name for this bot`).catch((error: any) => {
-      console.error(error);
+      logger.error(error);
     });
     return;
   }
@@ -85,7 +86,7 @@ async function handleOpenSeaMessage(ctx: Message<boolean>) {
   getOpenSeaAsset(collection, assetName).then((osAsset: OpenSeaAssetResponse | undefined) => {
     if (osAsset) {
       ctx.channel.send({ embeds: [buildOpenSeaEmbedMessage(osAsset)] }).catch((error: any) => {
-        console.error(error);
+        logger.error(error);
       });
     } else {
       ctx.channel.send(`Unable to retrieve OpenSea asset ${assetName}`);
