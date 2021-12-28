@@ -3,8 +3,10 @@ import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
 import logger from '../configs/logger.js';
 import { TownStarCraft, TownStarCraftData } from '../types/townStartCraft.js';
 
+let sessionId = '123456789ABC';
+
 async function authenticateSession(): Promise<void> {
-  const sessionId = process.env.TOWNSTAR_SESSION_ID;
+  sessionId = (Math.random() + 1).toString(36).substring(2);
   if (!sessionId) {
     console.error('Missing Town Star session ID from environment');
     return undefined;
@@ -27,12 +29,6 @@ async function authenticateSession(): Promise<void> {
 }
 
 export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[] | undefined> => {
-  const sessionId = process.env.TOWNSTAR_SESSION_ID;
-  if (!sessionId) {
-    logger.error('Missing Town Star session ID from environment');
-    return undefined;
-  }
-
   // TODO: Don't authenticate with every call
   await authenticateSession();
 
