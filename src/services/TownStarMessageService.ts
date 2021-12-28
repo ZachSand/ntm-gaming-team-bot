@@ -1,11 +1,11 @@
 import { EmbedFieldData, MessageEmbed } from 'discord.js';
 import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
 
-function buildTownStarWeeklyLeaderboardEmbed(
+export const buildTownStarWeeklyLeaderboardEmbed = (
   name: string,
   townStarLeaderboardUsers: TownStarLeaderboardUser[],
-): MessageEmbed {
-  return new MessageEmbed()
+): MessageEmbed =>
+  new MessageEmbed()
     .setColor('#0099ff')
     .setTitle('Town Star Weekly Competition')
     .setDescription(`Listing of players for the Town Star Weekly Competition with ${name} in their town name`)
@@ -22,6 +22,6 @@ function buildTownStarWeeklyLeaderboardEmbed(
     )
     .setTimestamp()
     .setFooter('NTM Discord Bot');
-}
 
-export default buildTownStarWeeklyLeaderboardEmbed;
+export const buildTownStarCraftMetricsMessage = (craftData: Map<string, number>): string =>
+  `\`\`\`\n${JSON.stringify(Array.from(craftData.entries()))}\`\`\``;

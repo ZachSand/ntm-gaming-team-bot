@@ -1,8 +1,11 @@
 import { Message } from 'discord.js';
 import bot from './discord.js';
 import buildOpenSeaEmbedMessage from '../services/OpenSeaMessageService.js';
-import getTsWeeklyLeaderboard from '../services/TownStarService.js';
-import buildTownStarWeeklyLeaderboardEmbed from '../services/TownStarMessageService.js';
+import { getCraftMetrics, getTsWeeklyLeaderboard } from '../services/TownStarService.js';
+import {
+  buildTownStarCraftMetricsMessage,
+  buildTownStarWeeklyLeaderboardEmbed,
+} from '../services/TownStarMessageService.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
 import getOpenSeaAsset from '../services/OpenSeaService.js';
 import logger from '../configs/logger.js';
@@ -11,7 +14,7 @@ function handleBotHelp(ctx: Message<boolean>) {
   ctx.channel
     .send(
       'Supported Bot Commnds:\n\n' +
-        '`!tsweekly searchTerm` - Displays the weekly leaderboard position for all towns with name in it (case insensitive). Example `!tsweekly ntm`\n\n' +
+        '`!tsweekly searchTerm` - Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive). Example `!tsweekly ntm`\n\n' +
         '`!os-town-star NFT Name` - Displays the OpenSea information for an item in the Town Star collection on OpenSea. ' +
         'Name must match the exact name in OpenSea. Example, `!os-town-star Wheat Stand`\n\n' +
         '`!os-mirandus NFT Name` - Displays the OpenSea information for an item in the Mirandus collection on OpenSea. ' +
@@ -94,6 +97,32 @@ async function handleOpenSeaMessage(ctx: Message<boolean>) {
   });
 }
 
+function parseCraftName(content: string): string | undefined {
+  const craftName = content.split(`!tscraft`);
+  if (craftName && craftName.length > 1 && craftName[1]) {
+    return craftName[1].trim();
+  }
+  return undefined;
+}
+
+function handleTownStarCraft(ctx: Message<boolean>) {
+  const craft = parseCraftName(ctx.content);
+  if (!craft) {
+    ctx.channel.send(`${ctx.content} is not a validly formed TownStar craft command`).catch((error: any) => {
+      logger.error(error);
+    });
+    return;
+  }
+
+  getCraftMetrics(craft).then((craftMetrics: Map<string, number> | undefined) => {
+    if (craftMetrics) {
+      ctx.channel.send(buildTownStarCraftMetricsMessage(craftMetrics));
+    } else {
+      ctx.channel.send('Unable to generate craft data');
+    }
+  });
+}
+
 const messageListener = () => {
   bot.on('messageCreate', async (ctx: Message<boolean>) => {
     if (!ctx.author.bot) {
@@ -106,6 +135,9 @@ const messageListener = () => {
       }
       if (caseInsensitiveContent.includes('!bot-commands'.toUpperCase())) {
         handleBotHelp(ctx);
+      }
+      if (caseInsensitiveContent.includes('!tscraft'.toUpperCase())) {
+        handleTownStarCraft(ctx);
       }
     }
   });
