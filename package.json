@@ -14,7 +14,7 @@
     "dev": "nodemon",
     "start": "node --loader ts-node/esm src/bot.ts",
     "production-start": "pm2 start .pm2-process.json",
-    "production-stop": "pm2 stop .pm2-process.json",
+    "production-deploy": "pm2 reload .pm2-process.json",
     "inspect": "nodemon --inspect src/bot.ts",
     "test": "jest --passWithNoTests",
     "lint": "npm run lint:js ",

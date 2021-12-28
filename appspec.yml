@@ -5,6 +5,6 @@ files:
     destination: /home/ec2-user/ntm-gaming-team-bot/
 hooks:
   ApplicationStart:
-    - location: yarn install && yarn build && yarn production-stop && yarn production-start
+    - location: yarn install && yarn build && yarn production-deploy
       timeout: 10000
       runas: ec2-user
