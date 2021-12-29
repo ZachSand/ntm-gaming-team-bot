@@ -76,21 +76,25 @@ function getChildCrafts(
     return metricsMap;
   }
 
-  if (tsCraft.Req1 !== 'none') {
-    const currentCount = metricsMap.get(tsCraft.Req1) || 0;
-    metricsMap.set(tsCraft.Req1, currentCount + tsCraft.Value1 * multiplier);
-    getChildCrafts(tsCraft.Req1, townStarCraftData, metricsMap, multiplier * tsCraft.Value1);
-  }
-  if (tsCraft.Req2 !== 'none') {
-    const currentCount = metricsMap.get(tsCraft.Req2) || 0;
-    metricsMap.set(tsCraft.Req2, currentCount + tsCraft.Value2 * multiplier);
-    getChildCrafts(tsCraft.Req2, townStarCraftData, metricsMap, multiplier * tsCraft.Value2);
-  }
-  if (tsCraft.Req3 !== 'none') {
-    const currentCount = metricsMap.get(tsCraft.Req3) || 0;
-    metricsMap.set(tsCraft.Req3, currentCount + tsCraft.Value3 * multiplier);
-    getChildCrafts(tsCraft.Req3, townStarCraftData, metricsMap, multiplier * tsCraft.Value3);
-  }
+  // Things that are usually obtained passively to not include in the craft results by default
+  const passiveCrafts = ['Energy', 'Water_Drum', 'Crude_Oil', 'Water'];
+
+  [
+    [tsCraft.Req1, tsCraft.Value1],
+    [tsCraft.Req2, tsCraft.Value2],
+    [tsCraft.Req3, tsCraft.Value3],
+  ].forEach((craftTuple) => {
+    if (craftTuple[0] !== 'none') {
+      const craftName: string = <string>craftTuple[0];
+      const craftQuantity: number = <number>craftTuple[1];
+      const currentCount = metricsMap.get(<string>craftTuple[0]) || 0;
+
+      if (!passiveCrafts.includes(craftName)) {
+        metricsMap.set(craftName, currentCount + craftQuantity * multiplier);
+        getChildCrafts(craftName, townStarCraftData, metricsMap, multiplier * craftQuantity);
+      }
+    }
+  });
 
   return metricsMap;
 }
