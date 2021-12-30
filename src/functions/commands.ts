@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js';
+import { Message } from 'discord.js';
 import _ from 'lodash';
 import bot from './discord.js';
 import buildOpenSeaEmbedMessage from '../services/OpenSeaMessageService.js';
@@ -12,15 +12,35 @@ import getOpenSeaAsset from '../services/OpenSeaService.js';
 import logger from '../configs/logger.js';
 import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser';
 
-function handleBotHelp(ctx: Message<boolean>) {
+const COMMANDS = {
+  TOWN_STAR_WEEKLY: '!tsweekly',
+  TOWN_STAR_CRAFT: '!tscraft',
+  OPEN_SEA_TOWN_STAR: '!os-townstar',
+  OPEN_SEA_MIRANDUS: '!os-mirandus',
+  BOT_HELP: '!bot-commands',
+};
+
+const GALA_OPEN_SEA_COLLECTION = {
+  TOWN_STAR: 'town-star',
+  MIRANDUS: 'mirandus',
+};
+
+const MAX_TS_CRAFT_AMOUNT = 1000;
+
+function handleBotHelp(ctx: Message) {
   ctx.channel
     .send(
-      'Supported Bot Commnds:\n\n' +
-        '`!tsweekly searchTerm` - Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive). Example `!tsweekly ntm`\n\n' +
-        '`!os-town-star NFT Name` - Displays the OpenSea information for an item in the Town Star collection on OpenSea. ' +
-        'Name must match the exact name in OpenSea. Example, `!os-town-star Wheat Stand`\n\n' +
-        '`!os-mirandus NFT Name` - Displays the OpenSea information for an item in the Mirandus collection on OpenSea. ' +
-        'Name must match the exact name in OpenSea. Example, `!os-mirandus Wharf`\n\n',
+      '**Supported Bot Commands**:\n\n' +
+        `\`${COMMANDS.TOWN_STAR_WEEKLY} searchTerm\` - Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive). 
+        Example \`!tsweekly ntm\`\n\n` +
+        `\`${COMMANDS.TOWN_STAR_CRAFT}\` craftName totalAmount(optional) - Displays the materials needed to craft "craftName" a "totalAmount" of times.` +
+        `Total amount must not exceed ${MAX_TS_CRAFT_AMOUNT} and is not a required parameter` +
+        `Example \`${COMMANDS.TOWN_STAR_CRAFT} uniforms\` or \`${COMMANDS.TOWN_STAR_CRAFT} candy canes\` or \`${COMMANDS.TOWN_STAR_CRAFT} Blue_Steel\`` +
+        `\`${COMMANDS.OPEN_SEA_TOWN_STAR} NFT Name\` - Displays the OpenSea information for an item in the Town Star collection on OpenSea. ` +
+        `Name must match the exact name in OpenSea. Example, \`${COMMANDS.OPEN_SEA_TOWN_STAR} Wheat Stand\`\n\n` +
+        `\`${COMMANDS.OPEN_SEA_MIRANDUS} NFT Name\` - Displays the OpenSea information for an item in the Mirandus collection on OpenSea. ` +
+        `Name must match the exact name in OpenSea. Example, \`${COMMANDS.OPEN_SEA_MIRANDUS} Wharf\`\n\n` +
+        `\`${COMMANDS.BOT_HELP}\` - Displays this command help message`,
     )
     .catch((error: any) => {
       logger.error(error);
@@ -35,7 +55,7 @@ function parseTownStarLeaderboardCommand(content: string): string | undefined {
   return undefined;
 }
 
-async function replyTownStartWeekly(ctx: Message<boolean>) {
+async function replyTownStartWeekly(ctx: Message) {
   const searchTerm = parseTownStarLeaderboardCommand(ctx.content);
   if (!searchTerm) {
     ctx.channel.send(`Unable to parse searchTerm from \`${ctx.content}\` for TownStar Weekly Leaderboard`);
@@ -58,19 +78,20 @@ async function replyTownStartWeekly(ctx: Message<boolean>) {
     return;
   }
 
-  _.chunk(tsLeaderboardSearchedUsers, 20)
-    .map((pagedResults: TownStarLeaderboardUser[], currentPage: number, leaderBoard: TownStarLeaderboardUser[][]) =>
-      buildTownStarWeeklyLeaderboardEmbed(searchTerm, pagedResults, currentPage + 1, leaderBoard.length),
-    )
-    .forEach((embedMessage: MessageEmbed) => ctx.channel.send({ embeds: [embedMessage] }));
+  ctx.channel.send({
+    embeds: _.chunk(tsLeaderboardSearchedUsers, 20).map(
+      (pagedResults: TownStarLeaderboardUser[], currentPage: number, leaderBoard: TownStarLeaderboardUser[][]) =>
+        buildTownStarWeeklyLeaderboardEmbed(searchTerm, pagedResults, currentPage + 1, leaderBoard.length),
+    ),
+  });
 }
 
 function parseOpenSeaCollection(command: string): string | undefined {
-  if (command && command.includes('!os-town-star')) {
-    return 'town-star';
+  if (command && command.includes(COMMANDS.OPEN_SEA_TOWN_STAR)) {
+    return GALA_OPEN_SEA_COLLECTION.TOWN_STAR;
   }
-  if (command && command.includes('!os-mirandus')) {
-    return 'mirandus';
+  if (command && command.includes(COMMANDS.OPEN_SEA_MIRANDUS)) {
+    return GALA_OPEN_SEA_COLLECTION.MIRANDUS;
   }
   return undefined;
 }
@@ -83,7 +104,7 @@ function parseOpenSeaAssetName(content: string, collection: string): string | un
   return undefined;
 }
 
-async function handleOpenSeaMessage(ctx: Message<boolean>) {
+async function handleOpenSeaMessage(ctx: Message) {
   const collection = parseOpenSeaCollection(ctx.content);
   if (!collection) {
     ctx.channel.send(`${ctx.content} is not a supported OpenSea Collection for this bot.`).catch((error: any) => {
@@ -112,25 +133,39 @@ async function handleOpenSeaMessage(ctx: Message<boolean>) {
 }
 
 function parseCraftName(content: string): string | undefined {
-  const craftName = content.split(`!tscraft`);
+  const craftName = content.split(' ');
   if (craftName && craftName.length > 1 && craftName[1]) {
     return craftName[1].trim();
   }
   return undefined;
 }
 
-function handleTownStarCraft(ctx: Message<boolean>) {
+function parseCraftAmount(content: string): number | undefined {
+  const craftAmount = content.split(' ');
+  if (craftAmount && craftAmount.length > 1 && craftAmount[craftAmount.length - 1]) {
+    const totalAmount = craftAmount[craftAmount.length - 1] || '1';
+    return Number.isNaN(totalAmount) ? 1 : parseInt(totalAmount, 10);
+  }
+  return undefined;
+}
+
+function handleTownStarCraft(ctx: Message) {
   const craft = parseCraftName(ctx.content);
   if (!craft) {
-    ctx.channel.send(`${ctx.content} is not a validly formed TownStar craft command`).catch((error: any) => {
+    ctx.channel.send(`${ctx.content} is not a validly formed Town Star craft command`).catch((error: any) => {
       logger.error(error);
     });
     return;
   }
 
+  let craftAmount: number = parseCraftAmount(ctx.content) || 1;
+  if (craftAmount > MAX_TS_CRAFT_AMOUNT) {
+    craftAmount = MAX_TS_CRAFT_AMOUNT;
+  }
+
   getCraftMetrics(craft).then((craftMetrics: Map<string, number> | undefined) => {
     if (craftMetrics) {
-      ctx.channel.send(buildTownStarCraftMetricsMessage(craftMetrics));
+      ctx.channel.send({ embeds: [buildTownStarCraftMetricsMessage(craft, craftMetrics, craftAmount)] });
     } else {
       ctx.channel.send('Unable to generate craft data');
     }
@@ -138,19 +173,19 @@ function handleTownStarCraft(ctx: Message<boolean>) {
 }
 
 const messageListener = () => {
-  bot.on('messageCreate', async (ctx: Message<boolean>) => {
+  bot.on('messageCreate', async (ctx: Message) => {
     if (!ctx.author.bot) {
       const caseInsensitiveContent = ctx.content.toUpperCase().trim();
-      if (caseInsensitiveContent.includes('!tsweekly'.toUpperCase())) {
+      if (caseInsensitiveContent.includes(COMMANDS.TOWN_STAR_WEEKLY.toUpperCase())) {
         await replyTownStartWeekly(ctx);
       }
       if (caseInsensitiveContent.includes('!os-'.toUpperCase())) {
         await handleOpenSeaMessage(ctx);
       }
-      if (caseInsensitiveContent.includes('!bot-commands'.toUpperCase())) {
+      if (caseInsensitiveContent.includes(COMMANDS.BOT_HELP.toUpperCase())) {
         handleBotHelp(ctx);
       }
-      if (caseInsensitiveContent.includes('!tscraft'.toUpperCase())) {
+      if (caseInsensitiveContent.includes(COMMANDS.TOWN_STAR_CRAFT.toUpperCase())) {
         handleTownStarCraft(ctx);
       }
     }

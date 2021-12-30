@@ -5,12 +5,11 @@ import { TownStarCraft, TownStarCraftData } from '../types/townStartCraft.js';
 
 let sessionId = '123456789ABC';
 
+// Things that are usually obtained passively to not include in the craft results by default
+const passiveCrafts = ['Energy', 'Water_Drum', 'Crude_Oil', 'Water'];
+
 async function authenticateSession(): Promise<void> {
   sessionId = (Math.random() + 1).toString(36).substring(2);
-  if (!sessionId) {
-    console.error('Missing Town Star session ID from environment');
-    return undefined;
-  }
 
   return axios.post(
     'https://townstar.sandbox-games.com/api/authenticate',
@@ -76,9 +75,6 @@ function getChildCrafts(
     return metricsMap;
   }
 
-  // Things that are usually obtained passively to not include in the craft results by default
-  const passiveCrafts = ['Energy', 'Water_Drum', 'Crude_Oil', 'Water'];
-
   [
     [tsCraft.Req1, tsCraft.Value1],
     [tsCraft.Req2, tsCraft.Value2],
@@ -101,16 +97,27 @@ function getChildCrafts(
 
 export const getCraftMetrics = async (craft: string): Promise<Map<string, number> | undefined> => {
   const townStarCraftData: TownStarCraftData = await getCraftData();
-  logger.info(townStarCraftData);
 
   if (!townStarCraftData) {
     logger.error('Unable to retrieve TownStarCraftData');
     return undefined;
   }
 
-  if (!townStarCraftData[craft]) {
-    logger.warn(`Unable to find ${craft} in TownStarCraftData`);
+  let craftName = craft.charAt(0).toUpperCase() + craft.toLowerCase().substring(1, craft.length).replace(' ', '_');
+  craftName = craftName.includes('_')
+    ? craftName
+        .split('_')
+        .map(
+          (craftFragment: string) =>
+            craftFragment.charAt(0).toUpperCase() + craftFragment.toLowerCase().substring(1, craft.length),
+        )
+        .join('_')
+        .trim()
+    : craftName;
+
+  if (!townStarCraftData[craftName]) {
+    logger.warn(`Unable to find ${craftName} in TownStarCraftData`);
   }
 
-  return getChildCrafts(craft, townStarCraftData, new Map(), 1);
+  return getChildCrafts(craftName, townStarCraftData, new Map(), 1);
 };

@@ -23,5 +23,26 @@ export const buildTownStarWeeklyLeaderboardEmbed = (
     .setTimestamp()
     .setFooter('NTM Discord Bot');
 
-export const buildTownStarCraftMetricsMessage = (craftData: Map<string, number>): string =>
-  `\`\`\`\n${JSON.stringify(Array.from(craftData.entries()))}\`\`\``;
+export const buildTownStarCraftMetricsMessage = (
+  craft: string,
+  craftData: Map<string, number>,
+  craftAmount: number,
+): MessageEmbed => {
+  const embedFieldData: EmbedFieldData[] = [];
+  craftData.forEach((materialCount: number, materialName: string) =>
+    embedFieldData.push({
+      name: materialName,
+      value: String(materialCount * craftAmount),
+      inline: true,
+    }),
+  );
+  return new MessageEmbed()
+    .setColor('#0099ff')
+    .setTitle(`Town Star craft materials for ${craftAmount} **${craft}**`)
+    .setDescription(
+      `Materials pulled from live game data. Common passive materials such as Water, Water Drum, Energy and Crude Oil are not included`,
+    )
+    .addFields(embedFieldData)
+    .setTimestamp()
+    .setFooter('NTM Discord Bot');
+};
