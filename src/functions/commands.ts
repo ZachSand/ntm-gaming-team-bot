@@ -160,7 +160,6 @@ function handleTownStarCraft(ctx: Message) {
     });
     return;
   }
-  console.log(craftName);
 
   let craftAmount: number = parseCraftAmount(ctx.content) || 1;
   if (craftAmount > MAX_TS_CRAFT_AMOUNT) {

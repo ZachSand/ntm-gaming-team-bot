@@ -14,12 +14,9 @@ In the future this may become containerized for more ubiquitous deployments.
 
 These environment variables should be kept private. Only set them up in a trusted environment.
 
-- TOWNSTAR_SESSION_ID
-    - This can be acquired by first logging into [TownStar](https://app.gala.games/games/town-star/play/). Then use the
-      developer console with the TownStar iframe selected, type `API.sessionId` or inspect the x-sessionid that is sent
-      in requests for the network tab
 - TOWNSTAR_SECRET
-    - This can be acquired by the same method of the TOWNSTAR_SESSION_ID but typing `API.token`
+    - This can be acquired by first logging into [TownStar](https://app.gala.games/games/town-star/play/). Then use the
+      developer console with the TownStar iframe selected, type `API.token`
 - DISCORD_BOT_KEY
     - This is acquired when you setup your Discord bot
 
