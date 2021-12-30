@@ -15,7 +15,7 @@ import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser';
 const COMMANDS = {
   TOWN_STAR_WEEKLY: '!tsweekly',
   TOWN_STAR_CRAFT: '!tscraft',
-  OPEN_SEA_TOWN_STAR: '!os-townstar',
+  OPEN_SEA_TOWN_STAR: '!os-town-star',
   OPEN_SEA_MIRANDUS: '!os-mirandus',
   BOT_HELP: '!bot-commands',
 };
