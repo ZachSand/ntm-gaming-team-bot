@@ -109,7 +109,7 @@ export const getCraftMetrics = async (craft: string): Promise<Map<string, number
         .split('_')
         .map(
           (craftFragment: string) =>
-            craftFragment.charAt(0).toUpperCase() + craftFragment.toLowerCase().substring(1, craft.length),
+            craftFragment.charAt(0).toUpperCase() + craftFragment.toLowerCase().substring(1, craftFragment.length),
         )
         .join('_')
         .trim()
