@@ -33,7 +33,7 @@ function handleBotHelp(ctx: Message) {
       '**Supported Bot Commands**:\n\n' +
         `\`${COMMANDS.TOWN_STAR_WEEKLY} searchTerm\` - Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive). Example \`!tsweekly ntm\`\n\n` +
         `\`${COMMANDS.TOWN_STAR_CRAFT}\` craftName totalAmount(optional) - Displays the materials needed to craft "craftName" a "totalAmount" of times.` +
-        `Total amount must not exceed ${MAX_TS_CRAFT_AMOUNT} and is not a required parameter\n\n` +
+        ` Total amount must not exceed ${MAX_TS_CRAFT_AMOUNT} and is not a required parameter\n\n` +
         `Example \`${COMMANDS.TOWN_STAR_CRAFT} uniforms\` or \`${COMMANDS.TOWN_STAR_CRAFT} candy canes\` or \`${COMMANDS.TOWN_STAR_CRAFT} Blue_Steel\`` +
         `\`${COMMANDS.OPEN_SEA_TOWN_STAR} NFT Name\` - Displays the OpenSea information for an item in the Town Star collection on OpenSea. ` +
         `Name must match the exact name in OpenSea. Example, \`${COMMANDS.OPEN_SEA_TOWN_STAR} Wheat Stand\`\n\n` +
@@ -134,7 +134,10 @@ async function handleOpenSeaMessage(ctx: Message) {
 function parseCraftName(content: string): string | undefined {
   const craftName = content.split(' ');
   if (craftName && craftName.length > 1 && craftName[1]) {
-    return craftName[1].trim();
+    return craftName
+      .slice(1)
+      .map((craftNameFragment: string) => (Number.isNaN(parseFloat(craftNameFragment)) ? craftNameFragment : ''))
+      .join(' ');
   }
   return undefined;
 }
@@ -149,22 +152,23 @@ function parseCraftAmount(content: string): number | undefined {
 }
 
 function handleTownStarCraft(ctx: Message) {
-  const craft = parseCraftName(ctx.content);
-  if (!craft) {
+  const craftName = parseCraftName(ctx.content);
+  if (!craftName) {
     ctx.channel.send(`${ctx.content} is not a validly formed Town Star craft command`).catch((error: any) => {
       logger.error(error);
     });
     return;
   }
+  console.log(craftName);
 
   let craftAmount: number = parseCraftAmount(ctx.content) || 1;
   if (craftAmount > MAX_TS_CRAFT_AMOUNT) {
     craftAmount = MAX_TS_CRAFT_AMOUNT;
   }
 
-  getCraftMetrics(craft).then((craftMetrics: Map<string, number> | undefined) => {
+  getCraftMetrics(craftName).then((craftMetrics: Map<string, number> | undefined) => {
     if (craftMetrics) {
-      ctx.channel.send({ embeds: [buildTownStarCraftMetricsMessage(craft, craftMetrics, craftAmount)] });
+      ctx.channel.send({ embeds: [buildTownStarCraftMetricsMessage(craftName, craftMetrics, craftAmount)] });
     } else {
       ctx.channel.send('Unable to generate craft data');
     }
