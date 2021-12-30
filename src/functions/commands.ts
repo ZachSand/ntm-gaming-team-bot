@@ -137,7 +137,8 @@ function parseCraftName(content: string): string | undefined {
     return craftName
       .slice(1)
       .map((craftNameFragment: string) => (Number.isNaN(parseFloat(craftNameFragment)) ? craftNameFragment : ''))
-      .join(' ');
+      .join(' ')
+      .trim();
   }
   return undefined;
 }
