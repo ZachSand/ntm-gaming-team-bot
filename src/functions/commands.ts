@@ -69,10 +69,10 @@ async function replyTownStartWeekly(ctx: Message) {
     return;
   }
 
-  const tsLeaderboardSearchedUsers = tsLeaderboardUsers.filter((user) =>
-    user.name.toUpperCase().trim().includes(searchTerm.toUpperCase().trim()),
+  const tsLeaderboardSearchedUsers = tsLeaderboardUsers.filter(
+    (user) => user.name && user.name.toUpperCase().trim().includes(searchTerm.toUpperCase().trim()),
   );
-  if (!tsLeaderboardSearchedUsers) {
+  if (!tsLeaderboardSearchedUsers || !tsLeaderboardSearchedUsers.length) {
     ctx.channel.send(`There were no users on the leaderboard found with ${searchTerm} used in their town name`);
     return;
   }

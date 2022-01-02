@@ -1,36 +1,46 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import * as crypto from 'crypto';
 import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
 import logger from '../configs/logger.js';
 import { TownStarCraft, TownStarCraftData } from '../types/townStartCraft.js';
 
-let sessionId = '123456789ABC';
-
 // Things that are usually obtained passively to not include in the craft results by default
 const passiveCrafts = ['Energy', 'Water_Drum', 'Crude_Oil', 'Water'];
+let currentSessionId: string;
 
-async function authenticateSession(): Promise<void> {
-  sessionId = (Math.random() + 1).toString(36).substring(2);
-
-  return axios.post(
-    'https://townstar.sandbox-games.com/api/authenticate',
-    {
-      userId: null,
-      secret: null,
-      token: process.env.TOWNSTAR_SECRET,
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-sessionid': sessionId,
-      },
-    },
-  );
+function generateTownStarSessionId() {
+  const buffer = new Uint8Array(24);
+  const bytes = crypto.randomBytes(buffer.length);
+  buffer.set(bytes);
+  return Array.from(buffer)
+    .map((t) => t.toString(16).padStart(2, '0'))
+    .join('');
 }
 
-export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[] | undefined> => {
-  // TODO: Don't authenticate with every call
-  await authenticateSession();
+async function authenticateSession(sessionId: string): Promise<string | undefined> {
+  return axios
+    .post(
+      'https://townstar.sandbox-games.com/api/authenticate',
+      {
+        userId: null,
+        secret: null,
+        token: process.env.TOWNSTAR_SECRET,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-sessionid': sessionId,
+        },
+      },
+    )
+    .then(() => sessionId)
+    .catch((error: Error | AxiosError) => {
+      logger.error(error);
+      return undefined;
+    });
+}
 
+function queryTownStarWeeklyLeaderboard(sessionId: string): Promise<TownStarLeaderboardUser[] | undefined> {
   return axios
     .get<TownStarLeaderboardUser[]>(
       'https://townstar.sandbox-games.com/api/game/weekly/leader/score?start=1&stop=10000',
@@ -43,12 +53,25 @@ export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[
     )
     .then((response: AxiosResponse<TownStarLeaderboardUser[]>) => response.data)
     .catch((error: Error | AxiosError) => {
-      if (axios.isAxiosError(error) && error.response?.status === 401) {
-        authenticateSession();
-      }
       logger.error(error);
       return undefined;
     });
+}
+
+export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[] | undefined> => {
+  if (!currentSessionId) {
+    currentSessionId = generateTownStarSessionId();
+    await authenticateSession(currentSessionId);
+  }
+
+  let townStarLeaderboardUsers = await queryTownStarWeeklyLeaderboard(currentSessionId);
+  if (!townStarLeaderboardUsers) {
+    currentSessionId = generateTownStarSessionId();
+    await authenticateSession(currentSessionId);
+    townStarLeaderboardUsers = await queryTownStarWeeklyLeaderboard(currentSessionId);
+  }
+
+  return townStarLeaderboardUsers;
 };
 
 function getCraftData(): Promise<TownStarCraftData> {
