@@ -30,6 +30,7 @@ async function authenticateSession(sessionId: string): Promise<string | undefine
         headers: {
           'Content-Type': 'application/json',
           'x-sessionid': sessionId,
+          Accept: '*/*',
         },
       },
     )
@@ -48,6 +49,7 @@ function queryTownStarWeeklyLeaderboard(sessionId: string): Promise<TownStarLead
         headers: {
           'Content-Type': 'application/json',
           'x-sessionid': sessionId,
+          Accept: '*/*',
         },
       },
     )
@@ -61,12 +63,14 @@ function queryTownStarWeeklyLeaderboard(sessionId: string): Promise<TownStarLead
 export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[] | undefined> => {
   if (!currentSessionId) {
     currentSessionId = generateTownStarSessionId();
+    logger.warn('Generating a new Town Star session ID for the first time');
     await authenticateSession(currentSessionId);
   }
 
   let townStarLeaderboardUsers = await queryTownStarWeeklyLeaderboard(currentSessionId);
   if (!townStarLeaderboardUsers) {
     currentSessionId = generateTownStarSessionId();
+    logger.error('Generating a new Town Star session ID due to failure retrieving leaderboards');
     await authenticateSession(currentSessionId);
     townStarLeaderboardUsers = await queryTownStarWeeklyLeaderboard(currentSessionId);
   }
