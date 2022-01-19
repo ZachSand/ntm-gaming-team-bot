@@ -4,7 +4,7 @@ import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
 import logger from '../configs/logger.js';
 import { TownStarCraft, TownStarCraftData } from '../types/townStartCraft.js';
 import { getTownStarCraftData, writeTownStarCraftData } from '../functions/databases.js';
-import handleAxiosError from '../utils/ErrorHandler';
+import handleAxiosError from '../utils/ErrorHandler.js';
 
 const CRAFT_DATA_URL = 'https://townstar.sandbox-games.com/files/assets/24578485/1/CraftsData.json';
 const TOWN_STAR_AUTH_URL = 'https://townstar.sandbox-games.com/api/authenticate';

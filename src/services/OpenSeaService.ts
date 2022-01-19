@@ -4,7 +4,7 @@ import { OpenSeaAsset } from '../types/openSeaAsset.js';
 import { AssetElement, OpenSeaAssetCollectionPage } from '../types/openSeaAssetCollectionPageResponse.js';
 import { getOpenSeaAssetByNameAndCollection, writeOpenSeaAsset } from '../functions/databases.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
-import handleAxiosError from '../utils/ErrorHandler';
+import handleAxiosError from '../utils/ErrorHandler.js';
 
 const OS_ASSETS_URI = 'https://api.opensea.io/api/v1/assets';
 const OS_ASSET_BASE_URI = 'https://api.opensea.io/api/v1/asset';
