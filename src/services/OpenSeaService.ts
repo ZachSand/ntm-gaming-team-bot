@@ -54,7 +54,8 @@ async function getOpenSeaAssetPage(
       return undefined;
     })
     .catch((error: Error | AxiosError) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
       return undefined;
     });
 }
@@ -67,7 +68,8 @@ async function getOpenSeaAssetData(osAsset: OpenSeaAsset): Promise<OpenSeaAssetR
     })
     .then((response: AxiosResponse<OpenSeaAssetResponse>) => response.data)
     .catch((error: Error | AxiosError) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
       return undefined;
     });
 }

@@ -55,7 +55,8 @@ function handleBotHelp(ctx: Message) {
         `**\`${COMMANDS.BOT_HELP}\`**\n*Displays this command help message*`,
     )
     .catch((error: any) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
     });
 }
 
@@ -127,7 +128,8 @@ async function handleOpenSeaMessage(ctx: Message) {
   const collection = parseOpenSeaCollection(ctx.content);
   if (!collection) {
     ctx.channel.send(`${ctx.content} is not a supported OpenSea Collection for this bot.`).catch((error: any) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
     });
     return;
   }
@@ -135,7 +137,8 @@ async function handleOpenSeaMessage(ctx: Message) {
   const assetName = parseOpenSeaAssetName(ctx.content, collection);
   if (!assetName) {
     ctx.channel.send(`${ctx.content} is not a supported OpenSea asset name for this bot`).catch((error: any) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
     });
     return;
   }
@@ -151,7 +154,8 @@ async function handleOpenSeaMessage(ctx: Message) {
   await getOpenSeaAsset(contractAddress, collection, assetName).then((osAsset: OpenSeaAssetResponse | undefined) => {
     if (osAsset) {
       ctx.channel.send({ embeds: [buildOpenSeaEmbedMessage(osAsset)] }).catch((error: any) => {
-        logger.error(error);
+        logger.error(error.name);
+        logger.error(error.message);
       });
     } else {
       ctx.channel.send(`Unable to retrieve OpenSea asset ${assetName}`);
@@ -184,7 +188,8 @@ function handleTownStarCraft(ctx: Message) {
   const craftName = parseCraftName(ctx.content);
   if (!craftName) {
     ctx.channel.send(`${ctx.content} is not a validly formed Town Star craft command`).catch((error: any) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
     });
     return;
   }

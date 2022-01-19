@@ -6,6 +6,6 @@ files:
     owner: ec2-user
 hooks:
   ApplicationStart:
-    - location: scripts/deploy.sh
+    - location: /home/ec2-user/ntm-gaming-team-bot/scripts/deploy.sh
       timeout: 180
       runas: ec2-user

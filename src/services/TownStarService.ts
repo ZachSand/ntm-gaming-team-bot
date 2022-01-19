@@ -42,7 +42,8 @@ async function authenticateSession(sessionId: string): Promise<string | undefine
     )
     .then(() => sessionId)
     .catch((error: Error | AxiosError) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
       return undefined;
     });
 }
@@ -58,7 +59,8 @@ function queryTownStarWeeklyLeaderboard(sessionId: string): Promise<TownStarLead
     })
     .then((response: AxiosResponse<TownStarLeaderboardUser[]>) => response.data)
     .catch((error: Error | AxiosError) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
       return undefined;
     });
 }
@@ -86,7 +88,8 @@ function getCraftData(): Promise<TownStarCraftData> {
     .get<AxiosResponse<TownStarCraftData>>(CRAFT_DATA_URL)
     .then((response: AxiosResponse) => response.data)
     .catch((error: Error | AxiosError) => {
-      logger.error(error);
+      logger.error(error.name);
+      logger.error(error.message);
     });
 }
 
