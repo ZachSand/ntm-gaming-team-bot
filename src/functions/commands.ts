@@ -17,13 +17,23 @@ const COMMANDS = {
   TOWN_STAR_CRAFT: '!tscraft',
   OPEN_SEA_TOWN_STAR: '!os-town-star',
   OPEN_SEA_MIRANDUS: '!os-mirandus',
+  OPEN_SEA_SPIDER_TANKS: '!os-spider-tanks',
+  OPEN_SEA_VOX: '!os-collectvox',
+  OPEN_SEA_MIRANDUS_VOX: '!os-collectvoxmirandus',
   BOT_HELP: '!bot-commands',
 };
 
 const GALA_OPEN_SEA_COLLECTION = {
   TOWN_STAR: 'town-star',
   MIRANDUS: 'mirandus',
+  SPIDER_TANKS: 'spider-tanks',
+  VOX: 'collectvox',
+  MIRANDUS_VOX: 'collectvoxmirandus',
 };
+
+const GALA_CONTRACT_ADDRESS = '0xc36cf0cfcb5d905b8b513860db0cfe63f6cf9f5c';
+const COLLECT_VOX_CONTRACT_ADDRESS = '0xad9fd7cb4fc7a0fbce08d64068f60cbde22ed34c';
+const COLLECT_MIRANDUS_VOX_CONTRACT_ADDRESS = '0xf76179bb0924ba7da8e7b7fc2779495d7a7939d8';
 
 const MAX_TS_CRAFT_AMOUNT = 1000;
 
@@ -31,15 +41,18 @@ function handleBotHelp(ctx: Message) {
   ctx.channel
     .send(
       '**Supported Bot Commands**:\n\n' +
-        `\`${COMMANDS.TOWN_STAR_WEEKLY} searchTerm\` - Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive). Example \`!tsweekly ntm\`\n\n` +
-        `\`${COMMANDS.TOWN_STAR_CRAFT} craftName totalAmount(optional)\` - Displays the materials needed to craft "craftName" a "totalAmount" of times.` +
-        ` Total amount must not exceed ${MAX_TS_CRAFT_AMOUNT} and is not a required parameter` +
-        `Example \`${COMMANDS.TOWN_STAR_CRAFT} uniforms\` or \`${COMMANDS.TOWN_STAR_CRAFT} candy canes 150\` or \`${COMMANDS.TOWN_STAR_CRAFT} Blue_Steel 5\`\n\n` +
-        `\`${COMMANDS.OPEN_SEA_TOWN_STAR} NFT Name\` - Displays the OpenSea information for an item in the Town Star collection on OpenSea. ` +
-        `Name must match the exact name in OpenSea. Example, \`${COMMANDS.OPEN_SEA_TOWN_STAR} Wheat Stand\`\n\n` +
-        `\`${COMMANDS.OPEN_SEA_MIRANDUS} NFT Name\` - Displays the OpenSea information for an item in the Mirandus collection on OpenSea. ` +
-        `Name must match the exact name in OpenSea. Example, \`${COMMANDS.OPEN_SEA_MIRANDUS} Wharf\`\n\n` +
-        `\`${COMMANDS.BOT_HELP}\` - Displays this command help message`,
+        '**Town Star Weekly**\n\n' +
+        `**\`${COMMANDS.TOWN_STAR_WEEKLY} searchTerm\`**\n*Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive).*\n - Example \`!tsweekly ntm\`\n\n` +
+        `**\`${COMMANDS.TOWN_STAR_CRAFT} craftName totalAmount(optional)\`**\n*Displays the materials needed to craft "craftName" a "totalAmount" of times.` +
+        ` Total amount must not exceed ${MAX_TS_CRAFT_AMOUNT} and is not a required parameter.*\n` +
+        ` - Example \`${COMMANDS.TOWN_STAR_CRAFT} uniforms\` or \`${COMMANDS.TOWN_STAR_CRAFT} candy canes 150\` or \`${COMMANDS.TOWN_STAR_CRAFT} Blue_Steel 5\`\n\n` +
+        '**Open Sea**\n\n' +
+        `**\`os-(collection-name) NFT Name\`**\n*Displays the OpenSea information for an item in the "collection-name" collection on OpenSea. ` +
+        `Name must match the exact name in OpenSea.*\n - Example, \`${COMMANDS.OPEN_SEA_TOWN_STAR} Wheat Stand\`\n\n` +
+        `**Supported Collections**: ${Object.values(GALA_OPEN_SEA_COLLECTION).join(', ')}\n\n` +
+        "**NOTE**: Some of Gala's OpenSea collections are mixed up. For instance, the town-star collection has the Santa's Slay tanks for Spider Tanks\n\n" +
+        '**Bot Help**\n\n' +
+        `**\`${COMMANDS.BOT_HELP}\`**\n*Displays this command help message*`,
     )
     .catch((error: any) => {
       logger.error(error);
@@ -73,7 +86,7 @@ async function replyTownStartWeekly(ctx: Message) {
     (user) => user.name && user.name.toUpperCase().trim().includes(searchTerm.toUpperCase().trim()),
   );
   if (!tsLeaderboardSearchedUsers || !tsLeaderboardSearchedUsers.length) {
-    ctx.channel.send(`There were no users on the leaderboard found with ${searchTerm} used in their town name`);
+    ctx.channel.send(`There were no users on the leaderboard found with ${searchTerm.trim()} used in their town name`);
     return;
   }
 
@@ -86,11 +99,18 @@ async function replyTownStartWeekly(ctx: Message) {
 }
 
 function parseOpenSeaCollection(command: string): string | undefined {
-  if (command && command.includes(COMMANDS.OPEN_SEA_TOWN_STAR)) {
-    return GALA_OPEN_SEA_COLLECTION.TOWN_STAR;
+  const supportedOpenSeaCollections = Object.values(GALA_OPEN_SEA_COLLECTION);
+  const osMessage = command.split(`!os-`);
+  let collection: string | undefined;
+  if (osMessage && osMessage.length > 0 && osMessage[1]) {
+    const osMessageFragment = osMessage[1].split(' ');
+    if (osMessageFragment && osMessageFragment.length > 0 && osMessageFragment[0]) {
+      [collection] = osMessageFragment;
+    }
   }
-  if (command && command.includes(COMMANDS.OPEN_SEA_MIRANDUS)) {
-    return GALA_OPEN_SEA_COLLECTION.MIRANDUS;
+
+  if (collection && supportedOpenSeaCollections.includes(collection)) {
+    return supportedOpenSeaCollections[supportedOpenSeaCollections.indexOf(collection)];
   }
   return undefined;
 }
@@ -120,7 +140,15 @@ async function handleOpenSeaMessage(ctx: Message) {
     return;
   }
 
-  getOpenSeaAsset(collection, assetName).then((osAsset: OpenSeaAssetResponse | undefined) => {
+  let contractAddress = GALA_CONTRACT_ADDRESS;
+  if (collection === GALA_OPEN_SEA_COLLECTION.VOX) {
+    contractAddress = COLLECT_VOX_CONTRACT_ADDRESS;
+  }
+  if (collection === GALA_OPEN_SEA_COLLECTION.MIRANDUS_VOX) {
+    contractAddress = COLLECT_MIRANDUS_VOX_CONTRACT_ADDRESS;
+  }
+
+  await getOpenSeaAsset(contractAddress, collection, assetName).then((osAsset: OpenSeaAssetResponse | undefined) => {
     if (osAsset) {
       ctx.channel.send({ embeds: [buildOpenSeaEmbedMessage(osAsset)] }).catch((error: any) => {
         logger.error(error);

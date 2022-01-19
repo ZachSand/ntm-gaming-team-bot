@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon",
-    "start": "node --loader ts-node/esm src/bot.ts",
+    "start": "NODE_ENV=development node --loader ts-node/esm src/bot.ts",
     "production-start": "pm2 start .pm2-process.json",
     "production-deploy": "pm2 reload .pm2-process.json",
     "inspect": "nodemon --inspect src/bot.ts",
@@ -27,6 +27,7 @@
     "discord.js": "^13.4.0",
     "lodash": "^4.17.21",
     "lowdb": "^3.0.0",
+    "p-throttle": "^5.0.0",
     "pm2": "^5.1.2",
     "winston": "^3.3.3"
   },
