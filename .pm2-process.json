@@ -7,12 +7,16 @@
   "exec_mode": "fork",
   "error_file": "./logs/errors_pm2.log",
   "out_file": "./logs/debug_pm2.log",
+  "env": {
+    "NODE_ENV": "production"
+  },
   "ignore_watch": [
     ".git",
     "logs",
     "databases",
     "node_modules",
     "npm-debug.log",
+    "debug.log",
     "combined.log",
     "error.log"
   ],

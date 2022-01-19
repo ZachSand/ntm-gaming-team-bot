@@ -3,9 +3,15 @@ import * as crypto from 'crypto';
 import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
 import logger from '../configs/logger.js';
 import { TownStarCraft, TownStarCraftData } from '../types/townStartCraft.js';
+import { getTownStarCraftData, writeTownStarCraftData } from '../functions/databases.js';
+
+const CRAFT_DATA_URL = 'https://townstar.sandbox-games.com/files/assets/24578485/1/CraftsData.json';
+const TOWN_STAR_AUTH_URL = 'https://townstar.sandbox-games.com/api/authenticate';
+const TOWN_STAR_LEADERBOARD_URL = 'https://townstar.sandbox-games.com/api/game/weekly/leader/score?start=1&stop=10000';
 
 // Things that are usually obtained passively to not include in the craft results by default
 const passiveCrafts = ['Energy', 'Water_Drum', 'Crude_Oil', 'Water'];
+
 let currentSessionId: string;
 
 function generateTownStarSessionId() {
@@ -20,7 +26,7 @@ function generateTownStarSessionId() {
 async function authenticateSession(sessionId: string): Promise<string | undefined> {
   return axios
     .post(
-      'https://townstar.sandbox-games.com/api/authenticate',
+      TOWN_STAR_AUTH_URL,
       {
         userId: null,
         secret: null,
@@ -43,16 +49,13 @@ async function authenticateSession(sessionId: string): Promise<string | undefine
 
 function queryTownStarWeeklyLeaderboard(sessionId: string): Promise<TownStarLeaderboardUser[] | undefined> {
   return axios
-    .get<TownStarLeaderboardUser[]>(
-      'https://townstar.sandbox-games.com/api/game/weekly/leader/score?start=1&stop=10000',
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-sessionid': sessionId,
-          Accept: '*/*',
-        },
+    .get<TownStarLeaderboardUser[]>(TOWN_STAR_LEADERBOARD_URL, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-sessionid': sessionId,
+        Accept: '*/*',
       },
-    )
+    })
     .then((response: AxiosResponse<TownStarLeaderboardUser[]>) => response.data)
     .catch((error: Error | AxiosError) => {
       logger.error(error);
@@ -80,9 +83,7 @@ export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[
 
 function getCraftData(): Promise<TownStarCraftData> {
   return axios
-    .get<AxiosResponse<TownStarCraftData>>(
-      'https://townstar.sandbox-games.com/launch/files/assets/24578485/1/CraftsData.json',
-    )
+    .get<AxiosResponse<TownStarCraftData>>(CRAFT_DATA_URL)
     .then((response: AxiosResponse) => response.data)
     .catch((error: Error | AxiosError) => {
       logger.error(error);
@@ -123,11 +124,20 @@ function getChildCrafts(
 }
 
 export const getCraftMetrics = async (craft: string): Promise<Map<string, number> | undefined> => {
-  const townStarCraftData: TownStarCraftData = await getCraftData();
+  /* Always attempt to retrieve the live data. Otherwise fall back to the cached data in the database if possible */
+  let townStarCraftData: TownStarCraftData = await getCraftData();
 
   if (!townStarCraftData) {
-    logger.error('Unable to retrieve TownStarCraftData');
-    return undefined;
+    logger.warn('Unable to retrieve TownStarCraftData. Falling back to database data');
+    const cachedCraftData = getTownStarCraftData();
+    if (cachedCraftData) {
+      townStarCraftData = cachedCraftData;
+    } else {
+      logger.error('Unable to retrieve TownStarCraftData from database');
+      return undefined;
+    }
+  } else {
+    await writeTownStarCraftData(townStarCraftData);
   }
 
   let craftName = craft.charAt(0).toUpperCase() + craft.toLowerCase().substring(1, craft.length).replace(' ', '_');
