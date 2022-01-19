@@ -40,7 +40,7 @@ export const buildTownStarCraftMetricsMessage = (
     .setColor('#0099ff')
     .setTitle(`Town Star craft materials for ${craftAmount} **${craft}**`)
     .setDescription(
-      `Materials pulled from live game data. Common passive materials such as Water, Water Drum, Energy and Crude Oil are not included`,
+      `Materials pulled from live or cached game data. Common passive materials such as Water, Water Drum, Energy and Crude Oil are not included`,
     )
     .addFields(embedFieldData)
     .setTimestamp()
