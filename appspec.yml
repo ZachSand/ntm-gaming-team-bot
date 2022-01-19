@@ -6,6 +6,6 @@ files:
     owner: ec2-user
 hooks:
   ApplicationStart:
-    - location: yarn install && yarn build && yarn production-deploy
+    - location: scripts/deploy.sh
       timeout: 180
       runas: ec2-user
