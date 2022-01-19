@@ -4,6 +4,7 @@ import { TownStarLeaderboardUser } from '../types/tsLeaderboardUser.js';
 import logger from '../configs/logger.js';
 import { TownStarCraft, TownStarCraftData } from '../types/townStartCraft.js';
 import { getTownStarCraftData, writeTownStarCraftData } from '../functions/databases.js';
+import handleAxiosError from '../utils/ErrorHandler';
 
 const CRAFT_DATA_URL = 'https://townstar.sandbox-games.com/files/assets/24578485/1/CraftsData.json';
 const TOWN_STAR_AUTH_URL = 'https://townstar.sandbox-games.com/api/authenticate';
@@ -42,8 +43,7 @@ async function authenticateSession(sessionId: string): Promise<string | undefine
     )
     .then(() => sessionId)
     .catch((error: Error | AxiosError) => {
-      logger.error(error.name);
-      logger.error(error.message);
+      handleAxiosError(error);
       return undefined;
     });
 }
@@ -59,8 +59,7 @@ function queryTownStarWeeklyLeaderboard(sessionId: string): Promise<TownStarLead
     })
     .then((response: AxiosResponse<TownStarLeaderboardUser[]>) => response.data)
     .catch((error: Error | AxiosError) => {
-      logger.error(error.name);
-      logger.error(error.message);
+      handleAxiosError(error);
       return undefined;
     });
 }
@@ -88,8 +87,7 @@ function getCraftData(): Promise<TownStarCraftData> {
     .get<AxiosResponse<TownStarCraftData>>(CRAFT_DATA_URL)
     .then((response: AxiosResponse) => response.data)
     .catch((error: Error | AxiosError) => {
-      logger.error(error.name);
-      logger.error(error.message);
+      handleAxiosError(error);
     });
 }
 

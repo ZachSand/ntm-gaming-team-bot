@@ -4,7 +4,7 @@ import { OpenSeaAsset } from '../types/openSeaAsset.js';
 import { AssetElement, OpenSeaAssetCollectionPage } from '../types/openSeaAssetCollectionPageResponse.js';
 import { getOpenSeaAssetByNameAndCollection, writeOpenSeaAsset } from '../functions/databases.js';
 import { OpenSeaAssetResponse } from '../types/openSeaAssetResponse.js';
-import logger from '../configs/logger.js';
+import handleAxiosError from '../utils/ErrorHandler';
 
 const OS_ASSETS_URI = 'https://api.opensea.io/api/v1/assets';
 const OS_ASSET_BASE_URI = 'https://api.opensea.io/api/v1/asset';
@@ -54,8 +54,7 @@ async function getOpenSeaAssetPage(
       return undefined;
     })
     .catch((error: Error | AxiosError) => {
-      logger.error(error.name);
-      logger.error(error.message);
+      handleAxiosError(error);
       return undefined;
     });
 }
@@ -68,8 +67,7 @@ async function getOpenSeaAssetData(osAsset: OpenSeaAsset): Promise<OpenSeaAssetR
     })
     .then((response: AxiosResponse<OpenSeaAssetResponse>) => response.data)
     .catch((error: Error | AxiosError) => {
-      logger.error(error.name);
-      logger.error(error.message);
+      handleAxiosError(error);
       return undefined;
     });
 }
