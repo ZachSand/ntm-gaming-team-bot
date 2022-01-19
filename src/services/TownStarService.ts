@@ -82,12 +82,13 @@ export const getTsWeeklyLeaderboard = async (): Promise<TownStarLeaderboardUser[
   return townStarLeaderboardUsers;
 };
 
-function getCraftData(): Promise<TownStarCraftData> {
+function getCraftData(): Promise<TownStarCraftData | undefined> {
   return axios
     .get<AxiosResponse<TownStarCraftData>>(CRAFT_DATA_URL)
     .then((response: AxiosResponse) => response.data)
     .catch((error: Error | AxiosError) => {
       handleAxiosError(error);
+      return undefined;
     });
 }
 
@@ -126,7 +127,7 @@ function getChildCrafts(
 
 export const getCraftMetrics = async (craft: string): Promise<Map<string, number> | undefined> => {
   /* Always attempt to retrieve the live data. Otherwise fall back to the cached data in the database if possible */
-  let townStarCraftData: TownStarCraftData = await getCraftData();
+  let townStarCraftData: TownStarCraftData | undefined = await getCraftData();
 
   if (!townStarCraftData) {
     logger.warn('Unable to retrieve TownStarCraftData. Falling back to database data');

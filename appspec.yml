@@ -9,3 +9,11 @@ hooks:
     - location: /home/ec2-user/ntm-gaming-team-bot/scripts/deploy.sh
       timeout: 180
       runas: ec2-user
+permissions:
+  - object: /home/ec2-user/ntm-gaming-team-bot/
+    pattern: "**"
+    owner: ec2-user
+    mode: 755
+    type:
+      - file
+      - directory
