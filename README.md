@@ -1,5 +1,45 @@
 # NTM Gaming Team Discord Bot
 
+This bot is built for the NTM Gaming Team's Discord server. It uses TypeScript, DiscordJS, Node 17+, PM2, lowdb and has
+an appspec and Github action for deploying to AWS EC2.
+
+## Bot Functionality
+
+Supported Bot Commands:
+
+Town Star Weekly
+
+`!tsweekly searchTerm`
+Displays the weekly leaderboard position for all towns with "searchTerm" in it (case insensitive).
+
+- Example `!tsweekly ntm`
+
+`!tscraft craftName totalAmount(optional)`
+Displays the materials needed to craft "craftName" a "totalAmount" of times. Total amount must not exceed 1000 and is
+not a required parameter.
+
+- Example `!tscraft uniforms 120` or `!tscraft candy canes 150` or `!tscraft Blue_Steel 5`
+
+Open Sea
+
+`os-(collection-name) NFT Name`
+Displays the OpenSea information for an item in the "collection-name" collection on OpenSea. Name must match the exact
+name in OpenSea.
+
+- Example, `!os-town-star Wheat Stand`
+
+Supported Collections: `town-star`, `mirandus`, `spider-tanks`, `collectvox`, `collectvoxmirandus`
+
+NOTE: Some of Gala's OpenSea collections are mixed up. For instance, the town-star collection has the Santa's Slay tanks
+for Spider Tanks
+
+Bot Help
+
+`!bot-commands`
+Displays the command help message
+
+## Running locally
+
 To run locally you will first need to install NodeJS and create
 a [Discord bot](https://discord.com/developers/applications). Additionally you will need to have
 a [Gala Games](https://app.gala.games/about) account and the ability to log into Town Star.

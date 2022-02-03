@@ -16,8 +16,10 @@ const OS_API_HEADERS = {
 };
 
 /*
- * Throttle request to only allow 2 every 10 seconds - OpenSea really likes to return 429 on requests
+ * Throttle request to only allow 2 every 5 seconds - OpenSea really likes to return 429 on requests
  * For a collection of 8888 this will make retrieving them all take 8888/50/2 * 5 seconds => ~7 minutes
+ * Ideally only used to cache the data in the lowdb JSON persisted file, shouldn't be used when the bot is
+ * running live. Needs reworking. 
  */
 const throttle = pThrottle({
   limit: 2,
